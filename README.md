@@ -1,6 +1,8 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Doom Emacs](https://img.shields.io/badge/Doom%20Emacs-config-4c1)](https://doomemacs.org)
+
 # personalDoomConfig
 
-A personal Doom Emacs configuration for Baba Gnu.
+A compact, portable Doom Emacs configuration for Baba Gnu — **Emacs v28+**, notable support: **Org**, **Rust**, **LSP**, **treemacs**, **vterm**.
 
 ⚡ Overview
 

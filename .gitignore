@@ -1,0 +1,25 @@
+# Emacs / Doom artifacts
+*.elc
+*~
+.#*
+
+# Local caches and build artifacts
+.local/
+.cache/
+.elpa/
+/.local/straight/
+
+# OS files
+.DS_Store
+
+# Editor backups and temporary files
+*~
+*.backup
+
+# Byte-compiled and temporary files
+*.el
+__pycache__/
+
+# Keep README and LICENSE tracked
+!README.md
+!LICENSE
