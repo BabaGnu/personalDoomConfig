@@ -12,6 +12,17 @@ This repository contains the Doom Emacs configuration files stored in `~/.config
 - `custom.el` — Machine-specific or Emacs-managed customizations.
 - `snippets/` — Yasnippet snippets used by the config.
 
+Quick summary (at-a-glance)
+
+- **Core features:** Doom UI (theme, modeline, dashboard), workspace support, `treemacs` project drawer, `vterm`, persistent undo and `magit` for Git.
+- **Completion & navigation:** `company`, `corfu` (with orderless/icons/dabbrev), and `vertico` (with icons/childframe) for fast completion and searching.
+- **Editing:** `evil` mode, snippets, format-on-save, multiple cursors, whitespace trimming, and smartparens-enabled defaults.
+- **Tools & LSP:** `lsp` (eglot + peek), `tree-sitter`, `llm` (LLM integrations), eval overlays, and PDF support.
+- **Languages with extra support:** `org` (roam/brain/contacts/noter/pretty/pandoc), `rust` (lsp + tree-sitter), `emacs-lisp`, `json`, `markdown`, `sh`, and `cc` (C/C++ with LSP).
+- **Quality checks:** Syntax checking and spell checking (flyspell).
+
+> Summary generated from `init.el` (modules enabled as of 2025-12-30).
+
 🎯 Goals
 
 - Provide a reproducible, portable Doom configuration.
