@@ -74,6 +74,11 @@ If you want to contribute or suggest improvements:
 - Open an issue or PR on https://github.com/BabaGnu/personalDoomConfig
 - Keep changes small and documented in the commit message
 
+Acknowledgements
+
+- Portions of this configuration were adapted from Josh Blais's "Literate Doom Emacs config": https://joshblais.com/blog/literate-doom-emacs-config/
+- An AI assistant (GitHub Copilot, Raptor mini (Preview)) was used to review, correct, and enhance parts of this configuration.
+
 License
 
 This repository does not include an explicit license. Add one if you want to permit reuse.
