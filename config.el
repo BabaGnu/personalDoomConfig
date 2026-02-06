@@ -15,11 +15,13 @@
 (setq file-name-handler-alist nil)
 
 ;; Increase read buffer for subprocess output (useful for LSP backends)
-(setq read-process-output-max (* 4 1024 1024))  ;; 4MB
+(setq read-process-output-max (* 8 1024 1024))  ;; 8MB
 
-;; Native compilation optimizations
-(setq comp-deferred-compilation t)  ;; Defer native compilation for faster startup
-(setq comp-async-jobs-number 8)     ;; Number of async compilation jobs
+;; Native compilation optimizations (guarded for older Emacsen)
+(when (boundp 'comp-deferred-compilation)
+      (setq comp-deferred-compilation t))  ;; Defer native compilation for faster startup
+(when (boundp 'comp-async-jobs-number)
+      (setq comp-async-jobs-number 8))     ;; Number of async compilation jobs
 
 ;; Frame performance optimizations (applies to all window systems)
 (setq frame-inhibit-implied-resize t
@@ -36,7 +38,7 @@
 (use-package! gcmh
   :config
   (setq gcmh-idle-delay 5
-        gcmh-high-cons-threshold (* 1024 1024 1024))  ;; 1GB
+        gcmh-high-cons-threshold (* 128 1024 1024))  ;; 128MB (safer default)
   (gcmh-mode 1))
 
 ;; Restore GC settings after startup
@@ -47,20 +49,20 @@
              (lambda ()
                (setq gc-cons-threshold (or my/gc-cons-threshold--saved (* 20 1024 1024)))
                (setq file-name-handler-alist my/file-name-handler-alist--saved)))))
-
+;;
 ;; ============================================================================
 ;; Wayland & Emacs 30.2 Specific Optimizations
 ;; ============================================================================
-;; Optimizations for Fedora 43 with Wayland and Emacs 30.2
-
+;; Optimizations for CachyOS (Arch-based) with Wayland and Emacs 30.2
+;;
 ;; PGTK (Pure GTK) backend optimizations for Wayland
 (when (eq window-system 'pgtk)
   ;; Better event handling for Wayland
   (setq pgtk-wait-for-event-timeout nil)
-
+  ;;
   ;; Disable input method context if not using IME (improves performance)
   (setq pgtk-use-im-context nil)
-
+  ;;
   ;; Enable Wayland-native clipboard integration
   (setq select-enable-clipboard t
         select-enable-primary t
@@ -69,12 +71,12 @@
   ;; Better Wayland window management
   (setq frame-resize-pixelwise t
         frame-inhibit-implied-resize t))
-
-;; Emacs 30.2 specific optimizations
+;;
+;; ;; Emacs 30.2 specific optimizations
 (when (>= emacs-major-version 30)
   ;; Better font rendering on Wayland
   (setq font-lock-maximum-decoration t)
-
+  ;;
   ;; Improved scrolling performance
   (setq scroll-margin 3
         scroll-step 1
@@ -83,15 +85,15 @@
 
   ;; Native compilation improvements in Emacs 30+
   (when (boundp 'native-comp-speed)
-    (setq native-comp-speed 3)))  ;; Maximum optimization level
+    (setq native-comp-speed 3))  ;; Maximum optimization level
+  ;;
+  ;; CachyOS/Arch-specific: Better integration
+  (when (file-exists-p "/etc/arch-release")
+    ;; Use system's default font rendering if available
+    ;; (setq font-use-system-font t)
 
-;; Fedora-specific: Better integration with system services
-(when (file-exists-p "/etc/fedora-release")
-  ;; Use system's default font rendering
-  (setq font-use-system-font t)
-
-  ;; Better integration with Fedora's desktop environment
-  (setq desktop-save-mode t))
+    ;; Better integration with the desktop environment
+    (setq desktop-save-mode t)))
 
 ;; ============================================================================
 ;; File Management Settings
@@ -105,45 +107,43 @@
 ;; ============================================================================
 ;; User Information
 ;; ============================================================================
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets. It is optional.
 ;; (setq user-full-name "Baba Gnu"
 ;;       user-mail-address "babagnu@outlook.com")
 
 ;; Auth sources for GPG, email, and other authentication
 (setq auth-sources '("~/.authinfo.gpg" "~/.authinfo")
       auth-source-cache-expiry nil)  ;; Default is 7200 (2h), nil = no expiry
-
 ;; ============================================================================
 ;; Fonts and Typography
 ;; ============================================================================
-(setq doom-font (font-spec :family "Comic Mono" :size 20 :weight 'regular)
-      doom-variable-pitch-font (font-spec :family "Open Sans" :size 22))
-
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 20 :weight 'regular)
+      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 22))
+;;
 ;; ============================================================================
 ;; Theme and Appearance
 ;; ============================================================================
 (setq doom-theme 'poet)
+;; (setq doom-theme 'doom-one)
 
 ;; Line numbers - use relative for better navigation (like vim)
 (setq display-line-numbers-type 'relative)
-
 ;; Visual line wrapping (soft wrap, doesn't insert newlines)
 (global-visual-line-mode t)
 
 ;; Cursor blink
 (blink-cursor-mode 1)
 
+
 ;; Remove top frame bar (cleaner look, especially for keyboard-driven workflow)
-(add-to-list 'default-frame-alist '(undecorated . t))
+;; (add-to-list 'default-frame-alist '(undecorated . t))
 
 ;; Transparency (optional - uncomment if you want transparent Emacs)
 ;; (set-frame-parameter (selected-frame) 'alpha '(96 . 97))
 ;; (add-to-list 'default-frame-alist '(alpha . (96 . 97)))
-
-;; ============================================================================
-;; Modeline Configuration
-;; ============================================================================
+;;
+;; ;; ============================================================================
+;; ;; Modeline Configuration
+;; ;; ============================================================================
 (setq doom-modeline-height 28
       doom-modeline-icon t                    ;; Show icons
       doom-modeline-major-mode-icon t         ;; Show major mode icon
@@ -212,20 +212,20 @@
   ;; History navigation
   (define-key vertico-map (kbd "M-p") #'vertico-previous-history)
   (define-key vertico-map (kbd "M-n") #'vertico-next-history)
-  (define-key vertico-map (kbd "C-r") #'consult-history)
+  (define-key vertico-map (kbd "C-r") #'consult-history))
 
-  ;; Configure orderless for better filtering
-  (setq completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles basic partial-completion orderless))))
+;; Configure orderless for better filtering
+(setq completion-styles '(orderless basic)
+      completion-category-defaults nil
+      completion-category-overrides '((file (styles basic partial-completion orderless))))
 
-  ;; Customize orderless behavior
-  (setq orderless-component-separator #'orderless-escapable-split-on-space
-        orderless-matching-styles '(orderless-literal
-                                    orderless-prefixes
-                                    orderless-initialism
-                                    orderless-flex
-                                    orderless-regexp)))
+;; Customize orderless behavior
+(setq orderless-component-separator #'orderless-escapable-split-on-space
+      orderless-matching-styles '(orderless-literal
+                                  orderless-prefixes
+                                  orderless-initialism
+                                  orderless-flex
+                                  orderless-regexp))
 
 ;; Quick command repetition - removed `vertico-repeat` (personal)
 ;; The following `use-package!` block was removed because it caused
@@ -233,10 +233,10 @@
 
 ;; Enhanced marginalia annotations
 (after! marginalia
-  (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-  ;; Show more details in marginalia
-  (setq marginalia-max-relative-age 0
-        marginalia-align 'right))
+      (setq marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light))
+      ;; Show more details in marginalia
+      (setq marginalia-max-relative-age 0
+                        marginalia-align 'right))
 
 ;; Embark configuration
 (map! :leader
@@ -270,33 +270,95 @@
    ("C-x C-d" . consult-dir)
    ("C-x C-j" . consult-dir-jump-file)))
 
-;; Additional useful shortcuts
+;; ============================================================================
+;; Advanced Navigation & Search (All Possible Ways)
+;; ============================================================================
+
+;; 0. Consult-Projectile integration
+(use-package! consult-projectile
+  :after (consult projectile))
+
+(defun consult-projectile-grep ()
+  "Search with ripgrep in the current project using consult."
+  (interactive)
+  (consult-ripgrep (projectile-project-root)))
+
+;; 1. Avy: The "God-speed" jump tool
+(use-package! avy
+  :config
+  (setq avy-all-windows t
+        avy-background t
+        avy-style 'at-full))
+
+;; 2. Dogears: Global back/forward button that works
+(use-package! dogears
+  :config
+  (dogears-mode 1)
+  (setq dogears-idle-interval 1.0))
+
+;; 3. Deadgrep: Powerful search buffer
+(use-package! deadgrep
+  :commands (deadgrep))
+
+;; 4. Symbol Overlay: Quick highlighting and jumping
+(use-package! symbol-overlay
+  :config
+  (setq symbol-overlay-idle-time 0.1))
+
+;; 5. Search & Jump Keybindings
 (map! :leader
-      (:prefix "s"
-       :desc "Command history" "h" #'consult-history
-       :desc "Recent directories" "d" #'consult-dir))
+      (:prefix-map ("s" . "search")
+       :desc "Search within buffer"       "b" #'consult-line
+       :desc "Search all open buffers"    "B" #'consult-line-multi
+       :desc "Search project (rg)"        "p" #'consult-ripgrep
+       :desc "Search project (P-rg)"      "P" #'consult-projectile-grep
+       :desc "Search project (deadgrep)"  "d" #'deadgrep
+       :desc "Search project (fd)"        "f" #'consult-fd
+       :desc "Search TODOs"               "t" #'consult-todo
+       :desc "Search project TODOs"       "T" #'+vertico/project-todo
+       :desc "Symbols (Imenu)"            "i" #'consult-imenu
+       :desc "Global History"             "h" #'consult-history
+       :desc "Recent directories"         "D" #'consult-dir)
 
-;; ============================================================================
-;; Company Configuration
-;; ============================================================================
-;; Company and Corfu can work together, but here's the recommendation:
-;;
-;; **RECOMMENDATION: Use Corfu only** (it's faster, more modern, and less intrusive)
-;; - Corfu shows completion inline (like VS Code)
-;; - Company shows popup tooltips (more traditional)
-;; - Using both can cause conflicts and confusion
-;;
-;; **If you want to use both:**
-;; - Corfu for general code completion (default)
-;; - Company for specific backends (like company-files for path completion)
-;; - Requires careful configuration to avoid conflicts
-;;
-;; **If you want to use Company only:**
-;; - Disable corfu in init.el
-;; - Company will handle all completion
-;;
-;; Current setup: Both enabled - Corfu is primary, Company is available for specific use cases
+      (:prefix-map ("j" . "jump")
+       :desc "Jump to char"               "j" #'avy-goto-char-timer
+       :desc "Jump to line"               "l" #'avy-goto-line
+       :desc "Jump to word"               "w" #'avy-goto-word-1
+       :desc "Jump to symbol"             "s" #'symbol-overlay-put
+       :desc "Jump to last change"        "e" #'goto-last-change
+       :desc "Jump back (dogears)"        "u" #'dogears-back
+       :desc "Jump forward (dogears)"     "i" #'dogears-forward
+       :desc "Jump to bookmark"           "b" #'consult-bookmark
+       :desc "Jump in list"               "m" #'consult-mark))
 
+;; M-i for quick symbol highlighting/navigation
+(map! "M-i" #'symbol-overlay-put
+      :map symbol-overlay-map
+      "n" #'symbol-overlay-jump-next
+      "p" #'symbol-overlay-jump-prev
+      "d" #'symbol-overlay-remove-all)
+;;
+;; ;; ============================================================================
+;; ;; Company Configuration
+;; ;; ============================================================================
+;; ;; Company and Corfu can work together, but here's the recommendation:
+;; ;;
+;; ;; **RECOMMENDATION: Use Corfu only** (it's faster, more modern, and less intrusive)
+;; ;; - Corfu shows completion inline (like VS Code)
+;; ;; - Company shows popup tooltips (more traditional)
+;; ;; - Using both can cause conflicts and confusion
+;; ;;
+;; ;; **If you want to use both:**
+;; ;; - Corfu for general code completion (default)
+;; ;; - Company for specific backends (like company-files for path completion)
+;; ;; - Requires careful configuration to avoid conflicts
+;; ;;
+;; ;; **If you want to use Company only:**
+;; ;; - Disable corfu in init.el
+;; ;; - Company will handle all completion
+;; ;;
+;; ;; Current setup: Both enabled - Corfu is primary, Company is available for specific use cases
+;;
 (after! company
   ;; Disable company-mode globally (we'll use corfu as primary)
   ;; Company will only activate for specific backends we configure
@@ -377,10 +439,11 @@
   (when (featurep 'cape)
     (add-to-list 'completion-at-point-functions #'cape-file)
     (add-to-list 'completion-at-point-functions #'cape-dabbrev)))
-
-;; ============================================================================
-;; Evil Mode Configuration
-;; ============================================================================
+;;
+;; ;; ============================================================================
+;; ;; Evil Mode Configuration
+;; ;; ============================================================================
+;; ;; Enable Emacs key bindings in insert mode (C-a, C-e, C-k, etc.)
 ;; Enable Emacs key bindings in insert mode (C-a, C-e, C-k, etc.)
 (after! evil
   ;; Enable standard Emacs key bindings in insert state
@@ -404,13 +467,13 @@
   (define-key evil-insert-state-map (kbd "M-b") #'backward-word)
   (define-key evil-insert-state-map (kbd "M-d") #'kill-word)
   (define-key evil-insert-state-map (kbd "M-<backspace>") #'backward-kill-word))
-
-;; ============================================================================
-;; Language-Specific Configuration
+;;
+;; ;; ============================================================================
+;; ;; Language-Specific Configuration
 ;; ============================================================================
 (after! rustic
   (setq rustic-lsp-server 'rust-analyzer))
-
+;;
 ;; ============================================================================
 ;; Org Mode Configuration
 ;; ============================================================================
@@ -421,6 +484,29 @@
                              (expand-file-name "journal" org-directory)
                              (expand-file-name "inbox" org-directory))
       org-default-notes-file (expand-file-name "inbox/inbox.org" org-directory))
+;; denote config
+;; Additional configurations can go here. For example, to enable completion
+;; for keywords, you might use an external package like consult-denote.
+;;     (info "(denote) Sample configuration")
+(use-package denote
+  :ensure t
+  :hook (dired-mode . denote-dired-mode)
+  :bind
+  (("C-c d n" . denote)
+   ("C-c d r" . denote-rename-file)
+   ("C-c d l" . denote-link)
+   ("C-c d b" . denote-backlinks)
+   ("C-c d d" . denote-dired)
+   ("C-c d g" . denote-grep))
+  :config
+  (setq denote-directory (expand-file-name "~/org/denotes/"))
+
+  ;; Automatically rename Denote buffers when opening them so that
+  ;; instead of their long file name they have, for example, a literal
+  ;; "[D]" followed by the file's title.  Read the doc string of
+  ;; `denote-rename-buffer-format' for how to modify this.
+  (denote-rename-buffer-mode 1))
+
 
 ;; Org Roam configuration
 (setq org-roam-directory (expand-file-name "roam" org-directory))
@@ -507,7 +593,7 @@
   (defun my/org-setup ()
     (set-face-attribute 'org-level-1 nil :font "DejaVu Sans" :weight 'bold :height 1.35)
     (set-face-attribute 'org-level-2 nil :font "DejaVu Sans" :weight 'bold :height 1.3)
-    (set-face-attribute 'org-document-title nil :font "Fira Code" :weight 'bold :height 1.8))
+    (set-face-attribute 'org-document-title nil :font "FiraCode Nerd Font" :weight 'bold :height 1.8))
   (add-hook 'org-mode-hook #'my/org-setup)
 
   ;; Habits
@@ -641,8 +727,8 @@
                   ((org-agenda-overriding-header "⚡ Next Actions")
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'scheduled 'deadline))))
             (agenda "" ((org-agenda-span 'day)
-                       (org-agenda-entry-types '(:deadline))
-                       (org-agenda-overriding-header "⏰ Upcoming Deadlines")))
+                        (org-agenda-entry-types '(:deadline))
+                        (org-agenda-overriding-header "⏰ Upcoming Deadlines")))
             (todo "WAIT"
                   ((org-agenda-overriding-header "⏳ Waiting For")))
             (tags-todo "+PRIORITY=\"A\""
@@ -698,102 +784,186 @@
   ;; Enable clock persistence
   (org-clock-persistence-insinuate))
 
-  ;; Inline images on open
-  (setq org-startup-with-inline-images t
-        org-image-actual-width nil)
+;; Inline images on open
+(setq org-startup-with-inline-images t
+      org-image-actual-width nil)
 
-  ;; Better checkboxes
-  (setq org-checkbox-hierarchical-statistics t)
+;; Better checkboxes
+(setq org-checkbox-hierarchical-statistics t)
 
-  ;; Tags and properties
-  (setq org-tag-alist '((:startgroup)
-                         ("@work" . ?w)
-                         ("@home" . ?h)
-                         ("@errand" . ?e)
-                         (:endgroup)
-                         ("PROJECT" . ?p)
-                         ("habit" . ?h)
-                         ("note" . ?n)
-                         ("meeting" . ?m))
-        org-tag-persistent-alist '((:startgroup)
-                                    ("@work" . ?w)
-                                    ("@home" . ?h)
-                                    ("@errand" . ?e)
-                                    (:endgroup)
-                                    ("PROJECT" . ?p))
-        org-use-fast-tag-selection t
-        org-fast-tag-selection-single-key 'expert
-        org-tags-column -80
-        org-agenda-tags-column -80)
+;; Tags and properties
+(setq org-tag-alist '((:startgroup)
+                      ("@work" . ?w)
+                      ("@home" . ?h)
+                      ("@errand" . ?e)
+                      (:endgroup)
+                      ("PROJECT" . ?p)
+                      ("habit" . ?h)
+                      ("note" . ?n)
+                      ("meeting" . ?m))
+      org-tag-persistent-alist '((:startgroup)
+                                 ("@work" . ?w)
+                                 ("@home" . ?h)
+                                 ("@errand" . ?e)
+                                 (:endgroup)
+                                 ("PROJECT" . ?p))
+      org-use-fast-tag-selection t
+      org-fast-tag-selection-single-key 'expert
+      org-tags-column -80
+      org-agenda-tags-column -80)
 
-  ;; Better TODO state changes
-  (setq org-todo-state-tags-triggers
-        '(("CANCELED" ("CANCELED" . t))
-          ("WAIT" ("WAITING" . t))
-          ("HOLD" ("HOLD" . t) ("@hold" . t))
-          (done ("WAITING") ("HOLD"))
-          ("TODO" ("WAITING") ("CANCELED") ("HOLD"))
-          ("NEXT" ("WAITING"))
-          ("DONE" ("WAITING") ("HOLD") ("CANCELED"))))
+;; Better TODO state changes
+(setq org-todo-state-tags-triggers
+      '(("CANCELED" ("CANCELED" . t))
+        ("WAIT" ("WAITING" . t))
+        ("HOLD" ("HOLD" . t) ("@hold" . t))
+        (done ("WAITING") ("HOLD"))
+        ("TODO" ("WAITING") ("CANCELED") ("HOLD"))
+        ("NEXT" ("WAITING"))
+        ("DONE" ("WAITING") ("HOLD") ("CANCELED"))))
 
-  ;; Refile completion
-  (setq org-completion-use-ido nil
-        org-outline-path-complete-in-steps nil
-        org-refile-use-outline-path t
-        org-refile-allow-creating-parent-nodes 'confirm)
+;; Refile completion
+(setq org-completion-use-ido nil
+      org-outline-path-complete-in-steps nil
+      org-refile-use-outline-path t
+      org-refile-allow-creating-parent-nodes 'confirm)
 
-  ;; Olivetti settings for centered writing
-  (setq olivetti-body-width 90)
+;; Olivetti settings for centered writing
+(setq olivetti-body-width 90)
 
-  ;; Org-mode hooks
-  (add-hook! 'org-mode
-    (visual-line-mode 1)
-    (variable-pitch-mode 1)
-    (when (display-graphic-p)
-      (olivetti-mode 1)))
+;; Org-mode hooks
+(add-hook! 'org-mode
+  (visual-line-mode 1)
+  (variable-pitch-mode 1)
+  (when (display-graphic-p)
+    (olivetti-mode 1)))
 
-  ;; Key bindings
+;; Key bindings
+(map! :leader
+      :prefix "o"
+      :desc "Capture" "c" #'org-capture
+      :desc "Agenda" "a" #'org-agenda
+      :desc "Goto" "g" #'org-goto
+      :desc "Store link" "l" #'org-store-link
+      :desc "Open at point" "f" #'org-open-at-point
+      :desc "Export" "e" #'org-export-dispatch
+      :desc "Zen mode" "z" #'zen-mode)
+
+;; ============================================================================
+;; Objed Fixes
+;; ============================================================================
+;; Prevent objed from crashing when it encounters keymaps during key rebinding checks.
+;; This often happens in Evil setups where some keys are bound to keymaps (like text objects).
+(after! objed
+  (defun my/objed--insert-keys-rebound-p-safe (orig-fn &rest args)
+    "Avoid crash in objed when checking for rebound keys."
+    (condition-case nil
+        (apply orig-fn args)
+      (error nil)))
+  (advice-add #'objed--insert-keys-rebound-p :around #'my/objed--insert-keys-rebound-p-safe))
+
+(map! :map org-mode-map
+      :leader
+      :prefix "o"
+      :desc "Insert link" "L" #'org-insert-link
+      :desc "Toggle checkbox" "x" #'org-toggle-checkbox
+      :desc "Toggle heading" "h" #'org-toggle-heading
+      :desc "Insert timestamp" "t" #'org-time-stamp
+      :desc "Priority up" "u" #'org-priority-up
+      :desc "Priority down" "d" #'org-priority-down
+      :desc "Archive subtree" "A" #'org-archive-subtree
+      :desc "Refile" "r" #'org-refile
+      :desc "Clock in" "I" #'org-clock-in
+      :desc "Clock out" "O" #'org-clock-out
+      :desc "Clock report" "R" #'org-clock-report)
+
+;; Agenda keybindings
+(map! :map org-agenda-mode-map
+      :leader
+      :prefix "o"
+      :desc "Refile" "r" #'org-agenda-refile
+      :desc "Archive" "A" #'org-agenda-archive
+      :desc "Set priority" "p" #'org-agenda-priority
+      :desc "Schedule" "s" #'org-agenda-schedule
+      :desc "Set deadline" "d" #'org-agenda-deadline
+      :desc "Toggle todo" "t" #'org-agenda-todo
+      :desc "Clock in" "I" #'org-agenda-clock-in
+      :desc "Show log" "l" #'org-agenda-log-mode)
+;; config.el
+(after! denote
+  (setq denote-directory "~/Documents/Notes/")) ; Set your desired notes directory
+;; Optional: add other custom configurations here
+
+
+;; Global quick access bindings
+(map! :leader
+      :prefix "n"
+      :desc "Quick capture" "c" #'org-capture
+      :desc "Agenda" "a" #'org-agenda
+      :desc "Switch to org" "o" (lambda () (interactive) (find-file org-directory)))
+;;
+;; ============================================================================
+;; Agentic coding via gptel
+;; ============================================================================
+(after! gptel
+  (setq gptel-model 'Qwen3-Coder:30B)
+  (setq gptel-backend (gptel-make-ollama "Ollama"
+                        :host "localhost:11434"
+                        :stream t
+                        :models '(llama3.2:latest Qwen3-Coder:30B)))
   (map! :leader
-        :prefix "o"
-        :desc "Capture" "c" #'org-capture
-        :desc "Agenda" "a" #'org-agenda
-        :desc "Goto" "g" #'org-goto
-        :desc "Store link" "l" #'org-store-link
-        :desc "Open at point" "f" #'org-open-at-point
-        :desc "Export" "e" #'org-export-dispatch
-        :desc "Zen mode" "z" #'zen-mode)
+        :prefix ("g" . "gptel")
+        :desc "Chat" "c" #'gptel-chat
+        :desc "Send" "s" #'gptel-send
+        :desc "Insert" "i" #'gptel-insert
+        :desc "Commands" "a" #'gptel-commands))
 
-  (map! :map org-mode-map
-        :leader
-        :prefix "o"
-        :desc "Insert link" "L" #'org-insert-link
-        :desc "Toggle checkbox" "x" #'org-toggle-checkbox
-        :desc "Toggle heading" "h" #'org-toggle-heading
-        :desc "Insert timestamp" "t" #'org-time-stamp
-        :desc "Priority up" "u" #'org-priority-up
-        :desc "Priority down" "d" #'org-priority-down
-        :desc "Archive subtree" "A" #'org-archive-subtree
-        :desc "Refile" "r" #'org-refile
-        :desc "Clock in" "I" #'org-clock-in
-        :desc "Clock out" "O" #'org-clock-out
-        :desc "Clock report" "R" #'org-clock-report)
+;; ============================================================================
+;; Reading (.epub support)
+;; ============================================================================
+(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+(after! nov
+  (setq nov-save-place-file (concat doom-cache-dir "nov-places"))
+  (add-hook 'nov-mode-hook #'visual-line-mode)
+  (add-hook 'nov-mode-hook #'variable-pitch-mode)
+  (add-hook 'nov-mode-hook #'olivetti-mode)
+  ;; Restrict width for better readability
+  (setq nov-text-width t)
+  (setq visual-fill-column-center-text t))
 
-  ;; Agenda keybindings
-  (map! :map org-agenda-mode-map
-        :leader
-        :prefix "o"
-        :desc "Refile" "r" #'org-agenda-refile
-        :desc "Archive" "A" #'org-agenda-archive
-        :desc "Set priority" "p" #'org-agenda-priority
-        :desc "Schedule" "s" #'org-agenda-schedule
-        :desc "Set deadline" "d" #'org-agenda-deadline
-        :desc "Toggle todo" "t" #'org-agenda-todo
-        :desc "Clock in" "I" #'org-agenda-clock-in
-        :desc "Show log" "l" #'org-agenda-log-mode)
+;; ============================================================================
+;; Text-to-Speech (Read Aloud)
+;; ============================================================================
+(use-package! read-aloud
+  :config
+  (setq read-aloud-engine "speech-dispatcher") ; Default for Linux
+  
+  (defun my/read-aloud-pdf-page ()
+    "Extract text from current PDF page and read it aloud using read-aloud-this."
+    (interactive)
+    (if (derived-mode-p 'pdf-view-mode)
+        (let ((text (pdf-info-gettext (pdf-view-current-page))))
+          (with-temp-buffer
+            (insert text)
+            (read-aloud-buf)))
+      (message "Not in a PDF buffer"))))
 
-  ;; Global quick access bindings
-  (map! :leader
-        :prefix "n"
-        :desc "Quick capture" "c" #'org-capture
-        :desc "Agenda" "a" #'org-agenda
-        :desc "Switch to org" "o" (lambda () (interactive) (find-file org-directory)))
+(map! :leader
+      :prefix ("o v" . "voice")
+      :desc "Read word or region" "v" #'read-aloud-this
+      :desc "Read buffer from point" "b" #'read-aloud-buf
+      :desc "Stop reading"         "s" #'read-aloud-stop
+      :desc "Change engine"        "e" #'read-aloud-change-engine
+      :desc "Read current PDF page" "p" #'my/read-aloud-pdf-page)
+
+;; ============================================================================
+;; Treemacs Custom Bindings
+;; ============================================================================
+(map! :leader
+      :desc "Toggle Treemacs" "e" #'+treemacs/toggle
+      :desc "Find file in Treemacs" "E" #'treemacs-find-file)
+
+;; ============================================================================
+;; Make emacs start maximized
+;; ============================================================================
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))

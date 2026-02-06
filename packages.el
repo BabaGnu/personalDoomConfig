@@ -73,8 +73,23 @@
 ;; Performance enhancements
 (package! gcmh)  ;; Garbage Collection Magic Hack
 
-;; Completion enhancements
-(package! consult-dir)  ;; Enhanced directory navigation
+;; Completion & Navigation enhancements
+(package! consult-dir)
+(package! avy)           ;; Jump to anything on screen
+(package! dogears)        ;; Better jump back/forward history
+(package! deadgrep)      ;; Dedicated search buffer
+(package! consult-projectile) ;; Consult integration for projectile
+(package! symbol-overlay)     ;; Highlight and jump between symbols
+(package! consult-todo)       ;; Search TODO/FIXME/etc.
+(package! goto-chg)           ;; Jump to last edit location
+(package! wgrep)              ;; Edit search results in buffer
 ;;(package! vertico-repeat)  ;; Quick command repetition
 
 ;;(package! vertico-repeat :recipe (:host github :repo "minad/vertico-repeat"))
+
+;; LLM / GPT
+(package! gptel)
+(package! denote)
+(package! djvu)
+(package! nov)
+(package! read-aloud)

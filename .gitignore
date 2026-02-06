@@ -17,7 +17,6 @@
 *.backup
 
 # Byte-compiled and temporary files
-*.el
 __pycache__/
 
 # Keep README and LICENSE tracked

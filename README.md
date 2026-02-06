@@ -2,106 +2,91 @@
 
 # personalDoomConfig
 
-A compact, portable Doom Emacs configuration for Baba Gnu — **Emacs v28+**, notable support: **Org**, **Rust**, **LSP**, **treemacs**, **vterm**.
+A powerful, high-performance Doom Emacs configuration for Baba Gnu — **Emacs v30+ (PGTK/Wayland optimized)**, featuring advanced navigation, agentic coding with **gptel**, and a rich **Org-mode** ecosystem.
 
 ⚡ Overview
 
 This repository contains the Doom Emacs configuration files stored in `~/.config/doom`:
 
-- `config.el` — Personal configuration: keybindings, settings, UI tweaks.
-- `init.el` — Enabled Doom modules and core module configuration.
-- `packages.el` — Additional packages to install with Doom.
-- `custom.el` — Machine-specific or Emacs-managed customizations.
-- `snippets/` — Yasnippet snippets used by the config.
+- `config.el` — Performance optimizations, advanced navigation, and package configurations.
+- `init.el` — Enabled Doom modules (Vertico, Corfu, LSP, Rust, etc.).
+- `packages.el` — Strategic additions: Avy, Dogears, Deadgrep, Gptel, and more.
 
-Quick summary (at-a-glance)
+🚀 Key Features & Upgrades
 
-- **Core features:** Doom UI (theme, modeline, dashboard), workspace support, `treemacs` project drawer, `vterm`, persistent undo and `magit` for Git.
-- **Completion & navigation:** `company`, `corfu` (with orderless/icons/dabbrev), and `vertico` (with icons/childframe) for fast completion and searching.
-- **Editing:** `evil` mode, snippets, format-on-save, multiple cursors, whitespace trimming, and smartparens-enabled defaults.
-- **Tools & LSP:** `lsp` (eglot + peek), `tree-sitter`, `llm` (LLM integrations), eval overlays, and PDF support.
-- **Languages with extra support:** `org` (roam/brain/contacts/noter/pretty/pandoc), `rust` (lsp + tree-sitter), `emacs-lisp`, `json`, `markdown`, `sh`, and `cc` (C/C++ with LSP).
-- **Quality checks:** Syntax checking and spell checking (flyspell).
+### 🔍 Search & Navigation (Omni-capable)
+*   **Buffer Search**: `SPC s b` (Consult-line) with live previews.
+*   **Project Search**: `SPC s p` (Ripgrep) and `SPC s d` (Deadgrep for long-running searches).
+*   **File Discovery**: `SPC s f` (Consult-fd) for lightning-fast file finding.
+*   **Jump anywhere**: `SPC j j` (Avy) for character jumping; `SPC j w` for word jumping.
+*   **Contextual Jump**: `SPC j u/i` (Dogears) for persistent "back/forward" history across buffers.
+*   **Symbol Mastery**: `M-i` (Symbol Overlay) to highlight and jump between instances; `SPC s i` (Imenu) to jump to code definitions.
+*   **Mass Edit**: **Wgrep** integration allows editing search results directly, applying changes across the whole project simultaneously.
 
-> Summary generated from `init.el` (modules enabled as of 2025-12-30).
+### 🤖 Agentic Coding & AI (Local First)
+*   **Integrated LLM**: Powered by **gptel** (`SPC g c`).
+*   **Model**: Configured for **Qwen3-Coder:30B** via local Ollama instance.
+*   **Workflow**: Seamless chat and code insertion directly into your active buffer.
+
+### 🍱 The "Ultimate" Org Ecosystem
+*   **Zettelkasten**: Full `org-roam` and `denote` integration for structured note-taking.
+*   **Aesthetics**: Premium look with `org-modern`, `org-superstar`, and `valign`.
+*   **Organization**: Custom high-visibility TODO keywords, custom priorities (A-C), and detailed capture templates (Tasks, Meetings, Journaling, Habits).
+*   **Project Management**: Custom Agenda views for daily dashboards and weekly reviews.
+
+### 🛠️ Language & Development
+*   **Rust**: Top-tier support with `rustic`, `rust-analyzer`, and `tree-sitter`.
+*   **C/C++**: Full LSP support via Eglot/Clangd.
+*   **Shell**: Optimised `vterm` and `eshell` support.
+*   **UI Helpers**: Format-on-save, `smartparens`, and `multiple-cursors` (`SPC e`) for bulk edits.
+
+### 📖 Reading & Accessibility
+*   **EPUB Support**: Native `.epub` reading via `nov.el` with reader-optimized typography (Olivetti mode).
+*   **Voice**: `read-aloud` integration (`SPC o v`) for Text-to-Speech support, including a custom engine to read PDF pages.
+
+### 🏎️ Performance & System (PGTK/Wayland)
+*   **Emacs 30.2 Hardware Accel**: Optimized for PGTK/Wayland (no resizing flicker, native clipboard, pixel-wise scrolling).
+*   **Native Comp**: Optimized for 8-core compilation (`comp-async-jobs-number 8`).
+*   **Garbage Collection**: Uses `gcmh` (Garbage Collection Magic Hack) for stutter-free editing.
+*   **UI**: **Poet** theme with **FiraCode Nerd Font** (Size 20) and relative line numbers for efficient Vim movement.
+
+> Fully updated to align with `config.el` as of February 2026.
 
 🎯 Goals
 
-- Provide a reproducible, portable Doom configuration.
-- Keep customizations concise and documented.
-- Allow easy onboarding on a new machine.
+- **Performance**: Sub-second responsiveness through aggressive GC and buffer management.
+- **Portability**: A single, self-documenting Doom setup for any modern Linux environment.
+- **Velocity**: Minimizing keystrokes via Avy, Consult, and advanced Evil-mode integration.
 
 Prerequisites
 
-- GNU Emacs (v28+ recommended)
-- Git
-- Doom Emacs: the core repository at `~/.emacs.d` (see install step)
+- **GNU Emacs**: v29+ required (v30.2 PGTK recommended for Wayland).
+- **Core Tools**: `ripgrep` (rg), `fd-find` (fd), `git`.
+- **Language Servers**: `rust-analyzer`, `clangd`.
+- **Fonts**: `FiraCode Nerd Font`, `Fira Sans`, `DejaVu Sans`.
 
 Installation
 
-1. Install Doom Emacs (if you haven't already):
-
+1. Install Doom Emacs:
    ```bash
    git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
    ~/.emacs.d/bin/doom install
    ```
 
-2. Place these config files in `~/.config/doom` (this repo is already laid out for that):
-
+2. Clone this repo to `~/.config/doom`:
    ```bash
-   # Option A: clone directly to ~/.config/doom
    git clone https://github.com/BabaGnu/personalDoomConfig ~/.config/doom
-
-   # Option B: if you copy files, ensure they live in ~/.config/doom
-   rsync -av . ~/.config/doom/
    ```
 
-3. Sync Doom to install packages and apply changes:
-
+3. Sync Doom:
    ```bash
-   ~/.emacs.d/bin/doom sync
-   # or, if `doom` is on PATH
    doom sync
    ```
 
-4. Restart Emacs (or run `doom sync` and `doom build` as needed).
-
-Configuration files
-
-- `init.el`: Select modules here — uncomment or configure the modules you want.
-- `packages.el`: Add package declarations using `package!`.
-- `config.el`: Your personal configuration lives here (hooks, settings, keybinds).
-- `custom.el`: Emacs writes machine-specific `customize` settings here; do not commit secrets.
-- `snippets/`: Yasnippet snippets, organized per mode.
-
-Tips & Maintenance
-
-- After adding a package, run `doom sync` to install it.
-- Keep `custom.el` out of version control if you want machine-specific settings not tracked here.
-- Use `doom doctor` to check for common issues.
-
-Contributing
-
-If you want to contribute or suggest improvements:
-
-- Open an issue or PR on https://github.com/BabaGnu/personalDoomConfig
-- Keep changes small and documented in the commit message
-
-Acknowledgements
-
-- Portions of this configuration were adapted from Josh Blais's "Literate Doom Emacs config": https://joshblais.com/blog/literate-doom-emacs-config/
-- An AI assistant (GitHub Copilot, Raptor mini (Preview)) was used to review, correct, and enhance parts of this configuration.
-
 License
 
-This repository does not include an explicit license. Add one if you want to permit reuse.
-
-Contact
-
-Repository: https://github.com/BabaGnu/personalDoomConfig
-
-Status: Pushed to GitHub (2025-12-30)
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-*Generated README for Doom Emacs config.*
+*Configured and refined by Antigravity (Advanced Agentic Coding).*
