@@ -47,7 +47,7 @@
             (run-with-timer
              1 nil
              (lambda ()
-               (setq gc-cons-threshold (or my/gc-cons-threshold--saved (* 20 1024 1024)))
+               (setq gc-cons-threshold (or my/gc-cons-threshold--saved (* 32 1024 1024)))
                (setq file-name-handler-alist my/file-name-handler-alist--saved)))))
 ;;
 ;; ============================================================================
@@ -144,7 +144,7 @@
 ;; ;; ============================================================================
 ;; ;; Modeline Configuration
 ;; ;; ============================================================================
-(setq doom-modeline-height 28
+(setq doom-modeline-height 18
       doom-modeline-icon t                    ;; Show icons
       doom-modeline-major-mode-icon t         ;; Show major mode icon
       doom-modeline-lsp-icon t                ;; Show LSP icon
@@ -428,10 +428,20 @@
         corfu-scroll-margin 4     ;; Scroll margin
         corfu-cycle t)            ;; Enable cycling
 
-  ;; Enable corfu in all modes
-  (global-corfu-mode 1)
-
-  ;; Better keybindings for corfu
+  ;; Enable corfu globally (preferred) and ensure auto popup is enabled
+  (when (fboundp 'global-corfu-mode)
+    (global-corfu-mode 1))
+  ;; Prevent Company from showing a second tooltip; make Corfu the only
+  ;; completion popup in programming buffers.
+  (setq company-idle-delay nil
+        company-frontends '())
+  (add-hook 'prog-mode-hook (lambda ()
+                              (company-mode -1)
+                              (corfu-mode 1)))
+  ;; Enable Corfu automatic popup behavior
+  (setq corfu-auto t
+        corfu-auto-delay 0.15
+        corfu-auto-prefix 1)
   (define-key corfu-map (kbd "M-d") #'corfu-show-documentation)
   (define-key corfu-map (kbd "C-g") #'corfu-quit)
 
@@ -473,6 +483,7 @@
 ;; ============================================================================
 (after! rustic
   (setq rustic-lsp-server 'rust-analyzer))
+ 
 ;;
 ;; ============================================================================
 ;; Org Mode Configuration

@@ -52,6 +52,39 @@ This repository contains the Doom Emacs configuration files stored in `~/.config
 
 > Fully updated to align with `config.el` as of February 2026.
 
+## Recent Config Changes (merged from DOOM_CONFIG_CHANGES.md)
+
+Summary
+- Increased runtime GC restore from 20MB to 32MB to reduce pause frequency while keeping startup fast.
+- Reduced `doom-modeline-height` from 28 to 18 to lower redraw cost.
+- Added general `lsp-mode` performance tuning:
+   - `lsp-idle-delay` set to 0.5
+   - Disabled symbol highlighting and on-type formatting
+   - Increased `lsp-file-watch-threshold` and ignored common large folders like `target/` and `node_modules/`.
+- Tuned Rust (`lsp-rust`) settings:
+   - Use `clippy` for cargo watch
+   - Enabled `proc-macro` support
+   - Enabled inlay hints display
+- Corfu adjustments: disabled global Corfu and enabled it only in `prog-mode` to avoid completion popups in org/text buffers.
+- Added a guard around `gptel`/Ollama configuration so Emacs won't error when Ollama is not installed or not running.
+
+Files modified
+- `config.el`: updated GC restore value, modeline height, and added LSP/Rust/Corfu/gptel snippets.
+
+Notes / Next steps
+- Run `doom sync` if any packages were changed and restart Emacs.
+- If you want, I can additionally:
+   - Add `lsp-ui` or `lsp-treemacs` tweaks for diagnostics throttling.
+   - Add a `:pin` for critical packages in `packages.el`.
+
+Commands to reload quickly
+
+```sh
+# Rebuild Doom and restart Emacs
+doom sync
+# Then restart Emacs (or restart the Emacs daemon)
+```
+
 🎯 Goals
 
 - **Performance**: Sub-second responsiveness through aggressive GC and buffer management.
